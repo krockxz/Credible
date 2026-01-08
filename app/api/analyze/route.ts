@@ -115,8 +115,8 @@ export async function POST(req: Request) {
       ? error.message.includes("quota")
         ? "API quota exceeded. Please try again later."
         : error.message.includes("timeout")
-        ? "Request timed out. Try with a shorter resume."
-        : "Failed to analyze resume"
+          ? "Request timed out. Try with a shorter resume."
+          : "Failed to analyze resume"
       : "Failed to analyze resume";
 
     return NextResponse.json(
