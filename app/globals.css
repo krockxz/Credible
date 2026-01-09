@@ -1,284 +1,48 @@
 @import "tailwindcss";
 
-@font-face {
-  font-family: 'Oswald';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url(https://fonts.gstatic.com/s/oswald/v53/TK3_WkUHHAIjg75cFRf3bXL8LICs1_FvsUtiZTaR.woff2) format('woff2');
+@theme {
+  --color-background: 0 0% 100%;
+  --color-foreground: 0 0% 3.9%;
+  --color-card: 0 0% 100%;
+  --color-card-foreground: 0 0% 3.9%;
+  --color-popover: 0 0% 100%;
+  --color-popover-foreground: 0 0% 3.9%;
+  --color-primary: 0 0% 9%;
+  --color-primary-foreground: 0 0% 98%;
+  --color-secondary: 0 0% 96.1%;
+  --color-secondary-foreground: 0 0% 9%;
+  --color-muted: 0 0% 96.1%;
+  --color-muted-foreground: 0 0% 45.1%;
+  --color-accent: 0 0% 96.1%;
+  --color-accent-foreground: 0 0% 9%;
+  --color-destructive: 0 84.2% 60.2%;
+  --color-destructive-foreground: 0 0% 98%;
+  --color-border: 0 0% 89.8%;
+  --color-input: 0 0% 89.8%;
+  --color-ring: 0 0% 3.9%;
+  --radius: 0.5rem;
 }
 
-@font-face {
-  font-family: 'Oswald';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url(https://fonts.gstatic.com/s/oswald/v53/TK3_WkUHHAIjg75cFRf3bXL8LICs1_FvsUJiZTaR.woff2) format('woff2');
-}
-
-@font-face {
-  font-family: 'IBM Plex Mono';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url(https://fonts.gstatic.com/s/ibmplexmono/v20/-F63fjptAgt5VM-kVkqdyU8n1i8q1w.woff2) format('woff2');
-}
-
-@font-face {
-  font-family: 'IBM Plex Mono';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url(https://fonts.gstatic.com/s/ibmplexmono/v20/-F6qfjptAgt5VM-kVkqdyU8n3vAOwlBFgg.woff2) format('woff2');
-}
-
-:root {
-  --font-display: 'Oswald', sans-serif;
-  --font-mono: 'IBM Plex Mono', monospace;
-  --color-void: #0a0a0b;
-  --color-paper: #fafafa;
-  --color-ink: #0a0a0b;
-  --color-electric: #6366f1;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-border: rgba(0, 0, 0, 0.08);
-  --color-border-dark: rgba(255, 255, 255, 0.1);
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: var(--font-mono);
-  background: var(--color-paper);
-  color: var(--color-ink);
-  min-height: 100vh;
-}
-
-.dark body {
-  background: var(--color-void);
-  color: var(--color-paper);
-}
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-  background: var(--color-electric);
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover { background: #4f46e5; }
-
-/* Aurora Background */
-.aurora-container {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.aurora-container::before {
-  content: '';
-  position: absolute;
-  inset: -50%;
-  width: 200%;
-  height: 200%;
-  background:
-    radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.12) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 50%, rgba(236, 72, 153, 0.05) 0%, transparent 50%);
-  animation: aurora 20s ease-in-out infinite;
-}
-
-@keyframes aurora {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  25% { transform: translate(-2%, 2%) rotate(-0.5deg); }
-  50% { transform: translate(-5%, 5%) rotate(-1deg); }
-  75% { transform: translate(-2%, 3%) rotate(-0.5deg); }
-}
-
-/* Grid Pattern */
-.grid-pattern {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background-image:
-    linear-gradient(var(--color-border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
-  background-size: 60px 60px;
-  opacity: 0.4;
-  pointer-events: none;
-}
-
-/* Noise Overlay */
-.noise-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  pointer-events: none;
-  opacity: 0.025;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-}
-
-/* Typography */
-.font-display {
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.font-mono { font-family: var(--font-mono); }
-
-/* Glitch Effect */
-.glitch-hover {
-  position: relative;
-  overflow: hidden;
-}
-
-.glitch-hover::before,
-.glitch-hover::after {
-  content: attr(data-text);
-  position: absolute;
-  left: 0;
-  top: 0;
-  opacity: 0;
-  transition: opacity 0.1s;
-}
-
-.glitch-hover::before {
-  text-shadow: 2px 0 var(--color-electric);
-}
-
-.glitch-hover::after {
-  text-shadow: -2px 0 var(--color-danger);
-}
-
-.glitch-hover:hover::before,
-.glitch-hover:hover::after {
-  opacity: 1;
-  animation: glitch 0.3s infinite;
-}
-
-@keyframes glitch {
-  0%, 100% { transform: translate(0); }
-  25% { transform: translate(-2px, 2px); }
-  50% { transform: translate(-2px, -2px); }
-  75% { transform: translate(2px, 2px); }
-}
-
-/* Score Reveal Animation */
-.score-reveal {
-  animation: scoreReveal 0.8s ease-out forwards;
-}
-
-@keyframes scoreReveal {
-  0% {
-    transform: scale(0.8);
-    opacity: 0;
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-background: 0 0% 3.9%;
+    --color-foreground: 0 0% 98%;
+    --color-card: 0 0% 3.9%;
+    --color-card-foreground: 0 0% 98%;
+    --color-popover: 0 0% 3.9%;
+    --color-popover-foreground: 0 0% 98%;
+    --color-primary: 0 0% 98%;
+    --color-primary-foreground: 0 0% 9%;
+    --color-secondary: 0 0% 14.9%;
+    --color-secondary-foreground: 0 0% 98%;
+    --color-muted: 0 0% 14.9%;
+    --color-muted-foreground: 0 0% 63.9%;
+    --color-accent: 0 0% 14.9%;
+    --color-accent-foreground: 0 0% 98%;
+    --color-destructive: 0 62.8% 30.6%;
+    --color-destructive-foreground: 0 0% 98%;
+    --color-border: 0 0% 14.9%;
+    --color-input: 0 0% 14.9%;
+    --color-ring: 0 0% 83.1%;
   }
-  50% {
-    transform: scale(1.02);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-/* Input Styles */
-.input-audit {
-  font-family: var(--font-mono);
-  border: 2px solid var(--color-border);
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-}
-
-.input-audit:focus {
-  border-color: var(--color-electric);
-  outline: none;
-  box-shadow:
-    0 0 0 3px rgba(99, 102, 241, 0.1),
-    0 0 20px rgba(99, 102, 241, 0.1);
-}
-
-.dark .input-audit {
-  background: rgba(0, 0, 0, 0.4);
-  border-color: var(--color-border-dark);
-}
-
-.dark .input-audit:focus {
-  box-shadow:
-    0 0 0 3px rgba(99, 102, 241, 0.2),
-    0 0 30px rgba(99, 102, 241, 0.15);
-}
-
-/* Card Styles */
-.card-audit {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--color-border);
-  transition: all 0.3s ease;
-}
-
-.card-audit:hover {
-  border-color: rgba(99, 102, 241, 0.3);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
-}
-
-.dark .card-audit {
-  background: rgba(10, 10, 11, 0.7);
-  border-color: var(--color-border-dark);
-}
-
-.dark .card-audit:hover {
-  border-color: rgba(99, 102, 241, 0.3);
-  box-shadow: 0 4px 30px rgba(99, 102, 241, 0.1);
-}
-
-/* Upload Zone */
-.upload-zone {
-  border: 2px dashed var(--color-border);
-  transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.4);
-}
-
-.dark .upload-zone {
-  background: rgba(0, 0, 0, 0.3);
-}
-
-.upload-zone:hover,
-.upload-zone.dragover {
-  border-color: var(--color-electric);
-  background: rgba(99, 102, 241, 0.05);
-  box-shadow: 0 0 30px rgba(99, 102, 241, 0.1);
-}
-
-/* Badge */
-.badge-audit {
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-size: 0.65rem;
-  padding: 0.25rem 0.6rem;
-  border: 1px solid currentColor;
-}
-
-/* Spinner */
-.spinner-audit {
-  width: 20px;
-  height: 20px;
-  border: 2px solid currentColor;
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }

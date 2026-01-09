@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import { Navbar } from "@/components/navbar";
-import { Form, Results } from "@/components/page";
+import { UploadForm } from "@/components/upload-form";
+import { ResultsDisplay } from "@/components/results-display";
 import { AnalysisResult } from "@/lib/types";
-import { useScoreAnimation } from "@/hooks/use-score-animation";
 
 const MIN_JOB_DESC_CHARS = 50;
 
@@ -15,8 +14,6 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const displayScore = useScoreAnimation(result?.score ?? 0);
 
   const handleSubmit = async () => {
     if (!file || jobDesc.length < MIN_JOB_DESC_CHARS) {
@@ -60,49 +57,36 @@ export default function HomePage() {
   };
 
   return (
-    <>
-      {/* Background Effects */}
-      <div className="aurora-container" />
-      <div className="grid-pattern" />
-      <div className="noise-overlay" />
-
-      {/* Navbar */}
+    <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex flex-col pt-16">
-        <main className="flex-1 max-w-6xl mx-auto w-full px-4 md:px-8 py-8 md:py-12">
-          <AnimatePresence mode="wait">
-            {!result ? (
-              <Form
-                jobDesc={jobDesc}
-                onJobDescChange={setJobDesc}
-                file={file}
-                onFileChange={setFile}
-                error={error}
-                onError={setError}
-                isLoading={isLoading}
-                onSubmit={handleSubmit}
-                minLength={MIN_JOB_DESC_CHARS}
-              />
-            ) : (
-              <Results
-                result={result}
-                displayScore={displayScore}
-                onReset={handleReset}
-              />
-            )}
-          </AnimatePresence>
-        </main>
+      <main className="max-w-4xl mx-auto px-4 py-12">
+        {!result ? (
+          <UploadForm
+            jobDesc={jobDesc}
+            onJobDescChange={setJobDesc}
+            file={file}
+            onFileChange={setFile}
+            error={error}
+            onError={setError}
+            isLoading={isLoading}
+            onSubmit={handleSubmit}
+            minLength={MIN_JOB_DESC_CHARS}
+          />
+        ) : (
+          <ResultsDisplay
+            result={result}
+            onReset={handleReset}
+          />
+        )}
+      </main>
 
-        {/* Footer */}
-        <footer className="border-t border-black/10 dark:border-white/10 px-4 md:px-8 py-6 mt-auto">
-          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs opacity-50">
-            <p>Powered by Google Gemini Flash</p>
-            <p>Built with Next.js + Acernity UI</p>
-          </div>
-        </footer>
-      </div>
-    </>
+      <footer className="border-t border-border px-4 py-6 mt-12">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+          <p>Powered by Google Gemini Flash</p>
+          <p>Built with Next.js + Acernity UI</p>
+        </div>
+      </footer>
+    </div>
   );
 }
