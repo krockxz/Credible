@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { Upload, FileText, AlertCircle, CheckCircle, X, Sparkles } from "lucide-react";
+import { Upload, FileText, AlertCircle, CheckCircle, X, Sparkles, Zap } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { Navbar } from "@/components/navbar";
+import { getScoreColor, getScoreBgColor, getScoreLabel } from "@/lib/utils";
 
 interface AnalysisResult {
   score: number;
@@ -12,6 +15,8 @@ interface AnalysisResult {
   recommendations: string[];
 }
 
+const MIN_JOB_DESC_CHARS = 50;
+
 export default function HomePage() {
   const [jobDesc, setJobDesc] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -19,29 +24,8 @@ export default function HomePage() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [displayScore, setDisplayScore] = useState(0);
-  const [animateResults, setAnimateResults] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
-
-  const getScoreColor = (score: number) => {
-    if (score >= 75) return "text-emerald-500";
-    if (score >= 50) return "text-amber-500";
-    return "text-rose-500";
-  };
-
-  const getScoreBg = (score: number) => {
-    if (score >= 75) return "bg-emerald-500";
-    if (score >= 50) return "bg-amber-500";
-    return "bg-rose-500";
-  };
-
-  const getScoreLabel = (score: number) => {
-    if (score >= 90) return "EXCEPTIONAL";
-    if (score >= 75) return "STRONG";
-    if (score >= 60) return "MODERATE";
-    if (score >= 40) return "WEAK";
-    return "POOR";
-  };
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -74,8 +58,8 @@ export default function HomePage() {
   };
 
   const handleSubmit = async () => {
-    if (!file || jobDesc.length < 50) {
-      setError("Please upload a resume and provide a job description (min 50 characters)");
+    if (!file || jobDesc.length < MIN_JOB_DESC_CHARS) {
+      setError(`Please upload a resume and provide a job description (min ${MIN_JOB_DESC_CHARS} characters)`);
       return;
     }
 
@@ -83,7 +67,6 @@ export default function HomePage() {
     setError(null);
     setResult(null);
     setDisplayScore(0);
-    setAnimateResults(false);
 
     const formData = new FormData();
     formData.append("resume", file);
@@ -102,20 +85,22 @@ export default function HomePage() {
 
       const data = await response.json();
       setResult(data);
-      setAnimateResults(true);
 
       // Animate score
-      let currentScore = 0;
-      const increment = data.score / 50;
+      const duration = 1200;
+      const steps = 60;
+      const increment = data.score / steps;
+      let current = 0;
+
       const timer = setInterval(() => {
-        currentScore += increment;
-        if (currentScore >= data.score) {
+        current += increment;
+        if (current >= data.score) {
           setDisplayScore(data.score);
           clearInterval(timer);
         } else {
-          setDisplayScore(Math.round(currentScore));
+          setDisplayScore(Math.round(current));
         }
-      }, 20);
+      }, duration / steps);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Analysis failed");
     } finally {
@@ -129,7 +114,6 @@ export default function HomePage() {
     setJobDesc("");
     setError(null);
     setDisplayScore(0);
-    setAnimateResults(false);
   };
 
   return (
@@ -139,280 +123,400 @@ export default function HomePage() {
       <div className="grid-pattern" />
       <div className="noise-overlay" />
 
+      {/* Navbar */}
+      <Navbar />
+
       {/* Main Content */}
-      <div className="relative z-10 min-h-screen">
-        {/* Header */}
-        <header className="border-b border-black/10 dark:border-white/10 py-6 px-4 md:px-8">
-          <div className="max-w-6xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[var(--color-electric)] flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <h1 className="text-display text-xl md:text-2xl font-bold">
-                RESUME<span className="text-[var(--color-electric)]">AUDIT</span>
-              </h1>
-            </div>
-            <span className="badge-audit hidden sm:inline-block border-[var(--color-electric)] text-[var(--color-electric)]">
-              BETA v1.0
-            </span>
-          </div>
-        </header>
-
-        <main className="max-w-6xl mx-auto px-4 md:px-8 py-12 md:py-16">
-          {!result ? (
-            <>
-              {/* Hero Section */}
-              <section className="text-center mb-16 stagger-in">
-                <h2 className="text-display text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-none">
-                  GET <span className="text-[var(--color-electric)] glitch-hover" data-text="ROASTED">ROASTED</span>
-                </h2>
-                <p className="text-mono text-sm md:text-base max-w-xl mx-auto opacity-70">
-                  Upload your resume. Paste the job description. Get brutally honest feedback from AI.
-                  No sugarcoating. Just actionable insights.
-                </p>
-              </section>
-
-              {/* Main Form */}
-              <div className="grid md:grid-cols-2 gap-8 mb-8">
-                {/* Job Description Input */}
-                <div className="stagger-in">
-                  <label className="flex items-center gap-2 text-display text-sm font-semibold mb-3">
-                    <FileText className="w-4 h-4" />
-                    JOB DESCRIPTION
-                  </label>
-                  <textarea
-                    value={jobDesc}
-                    onChange={(e) => setJobDesc(e.target.value)}
-                    placeholder="Paste the job description here..."
-                    className="input-audit w-full h-64 p-4 text-sm resize-none"
-                  />
-                  <div className="flex justify-between mt-2 text-xs opacity-50">
-                    <span>{jobDesc.length} characters</span>
-                    <span className={jobDesc.length >= 50 ? "text-[var(--color-success)]" : ""}>
-                      {jobDesc.length >= 50 ? "✓ Ready" : `Min 50 required`}
-                    </span>
-                  </div>
-                </div>
-
-                {/* File Upload */}
-                <div className="stagger-in">
-                  <label className="flex items-center gap-2 text-display text-sm font-semibold mb-3">
-                    <Upload className="w-4 h-4" />
-                    RESUME (PDF)
-                  </label>
-                  <div
-                    ref={dropZoneRef}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    onClick={() => fileInputRef.current?.click()}
-                    className="upload-zone h-64 flex flex-col items-center justify-center cursor-pointer relative group"
+      <div className="relative z-10 min-h-screen flex flex-col pt-16">
+        <main className="flex-1 max-w-6xl mx-auto w-full px-4 md:px-8 py-8 md:py-12">
+          <AnimatePresence mode="wait">
+            {!result ? (
+              <motion.div
+                key="form"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.4 }}
+              >
+                {/* Hero Section */}
+                <section className="text-center mb-16">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6 }}
+                    className="mb-6"
                   >
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".pdf"
-                      onChange={handleFileSelect}
-                      className="hidden"
-                    />
-                    {file ? (
-                      <div className="text-center p-4">
-                        <CheckCircle className="w-12 h-12 mx-auto mb-3 text-[var(--color-success)]" />
-                        <p className="text-display font-semibold">{file.name}</p>
-                        <p className="text-xs opacity-50 mt-1">{(file.size / 1024).toFixed(0)} KB</p>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setFile(null); }}
-                          className="mt-4 text-xs flex items-center gap-1 mx-auto hover:text-[var(--color-danger)]"
-                        >
-                          <X className="w-3 h-3" /> Remove
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="text-center p-4 group-hover:scale-105 transition-transform">
-                        <Upload className="w-12 h-12 mx-auto mb-3 opacity-50 group-hover:text-[var(--color-electric)] transition-colors" />
-                        <p className="text-display font-semibold">DROP PDF HERE</p>
-                        <p className="text-xs opacity-50 mt-1">or click to browse</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Error Display */}
-              {error && (
-                <div className="stagger-in card-audit p-4 mb-8 flex items-start gap-3 border-[var(--color-danger)]">
-                  <AlertCircle className="w-5 h-5 text-[var(--color-danger)] flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-[var(--color-danger)]">{error}</p>
-                </div>
-              )}
-
-              {/* Submit Button */}
-              <div className="stagger-in text-center">
-                <button
-                  onClick={handleSubmit}
-                  disabled={isLoading || !file || jobDesc.length < 50}
-                  className="btn-primary px-12 py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                >
-                  {isLoading ? (
-                    <span className="flex items-center gap-3">
-                      <div className="spinner-audit w-5 h-5" />
-                      ANALYZING...
-                    </span>
-                  ) : (
-                    "START AUDIT"
-                  )}
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              {/* Results Section */}
-              <div className="max-w-4xl mx-auto">
-                {/* Score Header */}
-                <div className="card-audit p-8 mb-8 text-center score-reveal">
-                  <div className="flex items-center justify-center gap-4 mb-6">
-                    <h2 className="text-display text-2xl">AUDIT SCORE</h2>
-                    <span className={`badge-audit ${getScoreBg(result.score)} text-white`}>
-                      {getScoreLabel(result.score)}
-                    </span>
-                  </div>
-
-                  {/* Large Score Display */}
-                  <div className="relative py-8">
-                    <div className="text-9xl font-bold text-display leading-none">
-                      <span className={getScoreColor(displayScore)}>{displayScore}</span>
-                      <span className="text-4xl opacity-30">/100</span>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--color-electric)]/10 border border-[var(--color-electric)]/20 text-[var(--color-electric)] text-xs font-display uppercase tracking-wider mb-6">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>AI-Powered Resume Analysis</span>
                     </div>
+                  </motion.div>
 
-                    {/* Progress Ring */}
-                    <svg className="absolute inset-0 w-full h-full -z-10" viewBox="0 0 400 200">
+                  <motion.h1
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1, duration: 0.6 }}
+                    className="font-display text-5xl md:text-7xl font-bold mb-6 leading-tight"
+                  >
+                    GET{" "}
+                    <span className="text-[var(--color-electric)] glitch-hover inline-block" data-text="ROASTED">
+                      ROASTED
+                    </span>
+                  </motion.h1>
+
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="font-mono text-sm md:text-base max-w-xl mx-auto opacity-60 leading-relaxed"
+                  >
+                    Upload your resume. Paste the job description. Get brutally honest feedback
+                    powered by AI.
+                  </motion.p>
+                </section>
+
+                {/* Main Form */}
+                <div className="grid md:grid-cols-2 gap-6 mb-8">
+                  {/* Job Description Input */}
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <label className="flex items-center gap-2 font-display text-xs font-semibold mb-3 uppercase tracking-wider">
+                      <FileText className="w-4 h-4 text-[var(--color-electric)]" />
+                      Job Description
+                    </label>
+                    <textarea
+                      value={jobDesc}
+                      onChange={(e) => setJobDesc(e.target.value)}
+                      placeholder="Paste the job description here..."
+                      className="input-audit w-full h-64 p-4 text-sm resize-none rounded-xl"
+                    />
+                    <div className="flex justify-between mt-3 text-xs opacity-50">
+                      <span>{jobDesc.length} characters</span>
+                      <span className={jobDesc.length >= MIN_JOB_DESC_CHARS ? "text-[var(--color-success)] font-medium" : ""}>
+                        {jobDesc.length >= MIN_JOB_DESC_CHARS ? "✓ Ready to analyze" : `Min ${MIN_JOB_DESC_CHARS} characters`}
+                      </span>
+                    </div>
+                  </motion.div>
+
+                  {/* File Upload */}
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    <label className="flex items-center gap-2 font-display text-xs font-semibold mb-3 uppercase tracking-wider">
+                      <Upload className="w-4 h-4 text-[var(--color-electric)]" />
+                      Resume (PDF)
+                    </label>
+                    <div
+                      ref={dropZoneRef}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="upload-zone h-64 flex flex-col items-center justify-center cursor-pointer rounded-xl"
+                    >
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".pdf"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                      />
+                      {file ? (
+                        <motion.div
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          className="text-center p-4"
+                        >
+                          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--color-success)]/10 flex items-center justify-center">
+                            <CheckCircle className="w-8 h-8 text-[var(--color-success)]" />
+                          </div>
+                          <p className="font-display text-sm font-semibold truncate max-w-[200px]">{file.name}</p>
+                          <p className="text-xs opacity-50 mt-1">{(file.size / 1024).toFixed(0)} KB</p>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setFile(null); }}
+                            className="mt-4 text-xs flex items-center gap-2 mx-auto px-4 py-2 rounded-lg hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] transition-colors"
+                          >
+                            <X className="w-3.5 h-3.5" /> Remove
+                          </button>
+                        </motion.div>
+                      ) : (
+                        <div className="text-center">
+                          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--color-electric)]/10 flex items-center justify-center">
+                            <Upload className="w-8 h-8 text-[var(--color-electric)] opacity-60" />
+                          </div>
+                          <p className="font-display text-sm font-semibold">Drop PDF here</p>
+                          <p className="text-xs opacity-50 mt-1">or click to browse</p>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* Error Display */}
+                <AnimatePresence>
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="mb-6 p-4 rounded-xl bg-[var(--color-danger)]/10 border border-[var(--color-danger)]/20 flex items-center gap-3"
+                    >
+                      <AlertCircle className="w-5 h-5 text-[var(--color-danger)] flex-shrink-0" />
+                      <p className="text-sm text-[var(--color-danger)]">{error}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Submit Button */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="text-center"
+                >
+                  <motion.button
+                    onClick={handleSubmit}
+                    disabled={isLoading || !file || jobDesc.length < MIN_JOB_DESC_CHARS}
+                    whileHover={{ scale: (!isLoading && file && jobDesc.length >= MIN_JOB_DESC_CHARS) ? 1.02 : 1 }}
+                    whileTap={{ scale: (!isLoading && file && jobDesc.length >= MIN_JOB_DESC_CHARS) ? 0.98 : 1 }}
+                    className="relative px-12 py-4 rounded-xl font-display text-sm uppercase tracking-wider overflow-hidden bg-[var(--color-electric)] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <AnimatePresence mode="wait">
+                      {isLoading ? (
+                        <motion.span
+                          key="loading"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="flex items-center justify-center gap-3"
+                        >
+                          <div className="spinner-audit" />
+                          Analyzing...
+                        </motion.span>
+                      ) : (
+                        <motion.span
+                          key="submit"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="flex items-center justify-center gap-2"
+                        >
+                          <Zap className="w-4 h-4" />
+                          Start Audit
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </motion.button>
+                </motion.div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="results"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+                className="max-w-3xl mx-auto"
+              >
+                {/* Score Card - FIXED ALIGNMENT */}
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                  className="card-audit p-8 mb-8 text-center score-reveal rounded-2xl"
+                >
+                  <div className="flex items-center justify-center gap-3 mb-6">
+                    <h2 className="font-display text-lg uppercase tracking-wider">Audit Score</h2>
+                    <span className={`badge-audit ${getScoreBgColor(result.score)} text-white rounded-full`}>
+                      {getScoreLabel(result.score).toUpperCase()}
+                    </span>
+                  </div>
+
+                  {/* FIXED: Score Display with proper centering */}
+                  <div className="relative flex items-center justify-center py-8">
+                    {/* SVG Ring - properly sized and positioned */}
+                    <svg
+                      className="absolute w-48 h-48"
+                      viewBox="0 0 200 200"
+                      style={{ transform: "rotate(-90deg)" }}
+                    >
+                      {/* Background circle */}
                       <circle
-                        cx="200"
+                        cx="100"
                         cy="100"
                         r="80"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="4"
+                        strokeWidth="8"
                         className="opacity-10"
                       />
-                      <circle
-                        cx="200"
+                      {/* Progress circle */}
+                      <motion.circle
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: displayScore / 100 }}
+                        transition={{ duration: 1, ease: "easeOut" }}
+                        cx="100"
                         cy="100"
                         r="80"
                         fill="none"
                         stroke="var(--color-electric)"
-                        strokeWidth="4"
-                        strokeDasharray={`${(displayScore / 100) * 502} 502`}
-                        transform="rotate(-90 200 100)"
-                        className="transition-all duration-300"
+                        strokeWidth="8"
+                        strokeLinecap="round"
+                        strokeDasharray={2 * Math.PI * 80}
+                        strokeDashoffset={2 * Math.PI * 80 * (1 - displayScore / 100)}
                       />
                     </svg>
+
+                    {/* Score text - centered in the ring */}
+                    <div className="relative z-10 text-center">
+                      <motion.div
+                        key={displayScore}
+                        initial={{ scale: 1.2 }}
+                        animate={{ scale: 1 }}
+                        className="text-7xl font-bold font-display leading-none"
+                      >
+                        <span className={getScoreColor(displayScore)}>{displayScore}</span>
+                        <span className="text-2xl opacity-30">/100</span>
+                      </motion.div>
+                    </div>
                   </div>
 
                   {/* Summary */}
-                  <p className="text-mono text-sm max-w-lg mx-auto opacity-80">
+                  <p className="font-mono text-sm max-w-lg mx-auto opacity-70 leading-relaxed mt-6">
                     {result.summary}
                   </p>
 
-                  {/* New Analysis Button */}
-                  <button
+                  {/* New Audit Button */}
+                  <motion.button
                     onClick={handleReset}
-                    className="mt-8 text-sm flex items-center gap-2 mx-auto hover:text-[var(--color-electric)] transition-colors"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="mt-8 text-xs flex items-center gap-2 mx-auto px-4 py-2 rounded-lg hover:bg-[var(--color-electric)]/10 hover:text-[var(--color-electric)] transition-colors"
                   >
-                    <Upload className="w-4 h-4" /> NEW AUDIT
-                  </button>
-                </div>
+                    <Upload className="w-4 h-4" /> New Audit
+                  </motion.button>
+                </motion.div>
 
                 {/* Results Grid */}
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid gap-4">
                   {/* Missing Keywords */}
                   {result.missing_keywords.length > 0 && (
-                    <div className={`card-audit p-6 ${animateResults ? "stagger-in" : ""}`}>
-                      <h3 className="flex items-center gap-2 text-display text-sm font-semibold mb-4 text-[var(--color-danger)]">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 }}
+                      className="card-audit p-6 rounded-2xl"
+                    >
+                      <h3 className="flex items-center gap-2 font-display text-xs font-semibold mb-4 text-[var(--color-danger)] uppercase tracking-wider">
                         <AlertCircle className="w-4 h-4" />
-                        MISSING KEYWORDS
-                        <span className="ml-auto text-xs opacity-50">{result.missing_keywords.length}</span>
+                        Missing Keywords
+                        <span className="ml-auto text-xs opacity-40">{result.missing_keywords.length}</span>
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {result.missing_keywords.map((keyword, i) => (
-                          <span
+                          <motion.span
                             key={i}
-                            className="badge-audit border-[var(--color-danger)] text-[var(--color-danger)]"
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.05 * i }}
+                            className="badge-audit border-[var(--color-danger)] text-[var(--color-danger)] text-xs"
                           >
                             {keyword}
-                          </span>
+                          </motion.span>
                         ))}
                       </div>
-                    </div>
+                    </motion.div>
                   )}
 
-                  {/* Formatting Issues */}
-                  {result.formatting_issues.length > 0 && (
-                    <div className={`card-audit p-6 ${animateResults ? "stagger-in" : ""}`}>
-                      <h3 className="flex items-center gap-2 text-display text-sm font-semibold mb-4 text-[var(--color-warning)]">
-                        <AlertCircle className="w-4 h-4" />
-                        FORMATTING ISSUES
-                        <span className="ml-auto text-xs opacity-50">{result.formatting_issues.length}</span>
-                      </h3>
-                      <ul className="space-y-2">
-                        {result.formatting_issues.map((issue, i) => (
-                          <li key={i} className="text-sm flex items-start gap-2">
-                            <span className="opacity-30">{String(i + 1).padStart(2, "0")}</span>
-                            <span>{issue}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {/* Formatting Issues */}
+                    {result.formatting_issues.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.15 }}
+                        className="card-audit p-6 rounded-2xl"
+                      >
+                        <h3 className="flex items-center gap-2 font-display text-xs font-semibold mb-4 text-[var(--color-warning)] uppercase tracking-wider">
+                          <AlertCircle className="w-4 h-4" />
+                          Formatting Issues
+                          <span className="ml-auto text-xs opacity-40">{result.formatting_issues.length}</span>
+                        </h3>
+                        <ul className="space-y-3">
+                          {result.formatting_issues.map((issue, i) => (
+                            <li key={i} className="text-sm flex gap-3">
+                              <span className="opacity-30 text-xs mt-0.5">{i + 1}.</span>
+                              <span className="flex-1">{issue}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </motion.div>
+                    )}
 
-                  {/* Strengths */}
-                  {result.strengths.length > 0 && (
-                    <div className={`card-audit p-6 ${animateResults ? "stagger-in" : ""}`}>
-                      <h3 className="flex items-center gap-2 text-display text-sm font-semibold mb-4 text-[var(--color-success)]">
-                        <CheckCircle className="w-4 h-4" />
-                        STRENGTHS
-                        <span className="ml-auto text-xs opacity-50">{result.strengths.length}</span>
-                      </h3>
-                      <ul className="space-y-3">
-                        {result.strengths.map((strength, i) => (
-                          <li key={i} className="text-sm flex items-start gap-2">
-                            <span className="text-[var(--color-success)]">✓</span>
-                            <span>{strength}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                    {/* Strengths */}
+                    {result.strengths.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="card-audit p-6 rounded-2xl"
+                      >
+                        <h3 className="flex items-center gap-2 font-display text-xs font-semibold mb-4 text-[var(--color-success)] uppercase tracking-wider">
+                          <CheckCircle className="w-4 h-4" />
+                          Strengths
+                          <span className="ml-auto text-xs opacity-40">{result.strengths.length}</span>
+                        </h3>
+                        <ul className="space-y-3">
+                          {result.strengths.map((strength, i) => (
+                            <li key={i} className="text-sm flex gap-3">
+                              <span className="text-[var(--color-success)] text-xs mt-0.5">✓</span>
+                              <span className="flex-1">{strength}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </motion.div>
+                    )}
+                  </div>
 
                   {/* Recommendations */}
                   {result.recommendations.length > 0 && (
-                    <div className={`card-audit p-6 ${animateResults ? "stagger-in" : ""}`}>
-                      <h3 className="flex items-center gap-2 text-display text-sm font-semibold mb-4 text-[var(--color-electric)]">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.25 }}
+                      className="card-audit p-6 rounded-2xl"
+                    >
+                      <h3 className="flex items-center gap-2 font-display text-xs font-semibold mb-4 text-[var(--color-electric)] uppercase tracking-wider">
                         <Sparkles className="w-4 h-4" />
-                        RECOMMENDATIONS
-                        <span className="ml-auto text-xs opacity-50">{result.recommendations.length}</span>
+                        Recommendations
+                        <span className="ml-auto text-xs opacity-40">{result.recommendations.length}</span>
                       </h3>
                       <ul className="space-y-3">
                         {result.recommendations.map((rec, i) => (
-                          <li key={i} className="text-sm flex items-start gap-2">
-                            <span className="text-[var(--color-electric)]">→</span>
-                            <span>{rec}</span>
+                          <li key={i} className="text-sm flex gap-3">
+                            <span className="text-[var(--color-electric)] text-xs mt-0.5">→</span>
+                            <span className="flex-1">{rec}</span>
                           </li>
                         ))}
                       </ul>
-                    </div>
+                    </motion.div>
                   )}
                 </div>
-              </div>
-            </>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-black/10 dark:border-white/10 py-6 px-4 md:px-8 mt-16">
+        <footer className="border-t border-black/10 dark:border-white/10 px-4 md:px-8 py-6 mt-auto">
           <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs opacity-50">
             <p>Powered by Google Gemini Flash</p>
-            <p>Built with Next.js + Aceternity UI</p>
+            <p>Built with Next.js + Acernity UI</p>
           </div>
         </footer>
       </div>

@@ -16,7 +16,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
  * Uses gemini-1.5-flash for fast, cost-effective analysis
  */
 export const model: GenerativeModel = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash",
+  model: "gemini-3-flash-preview",
   generationConfig: {
     responseMimeType: "application/json",
     temperature: 0.7,
