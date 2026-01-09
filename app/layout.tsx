@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "RESUME AUDIT | Get Roasted by AI",
+  title: "Credible | AI Resume Analysis",
   description: "Brutally honest resume analysis. Upload your resume, paste the job description, get actionable feedback. No sugarcoating.",
 };
 

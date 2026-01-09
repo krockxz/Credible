@@ -57,10 +57,16 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Subtle background gradient */}
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/3 via-transparent to-primary/5" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.08),rgba(255,255,255,0))]" />
+      </div>
+
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-4 py-12">
+      <main className="max-w-2xl mx-auto px-4 py-16">
         {!result ? (
           <UploadForm
             jobDesc={jobDesc}
@@ -81,10 +87,10 @@ export default function HomePage() {
         )}
       </main>
 
-      <footer className="border-t border-border px-4 py-6 mt-12">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+      <footer className="border-t border-border/40 px-4 py-6 mt-12">
+        <div className="max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <p>Powered by Google Gemini Flash</p>
-          <p>Built with Next.js + Acernity UI</p>
+          <p>Built with Next.js + shadcn/ui</p>
         </div>
       </footer>
     </div>
