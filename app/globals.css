@@ -171,28 +171,6 @@ body {
   75% { transform: translate(2px, 2px); }
 }
 
-/* Staggered Animation */
-.stagger-in {
-  animation: fadeInUp 0.6s ease-out forwards;
-  opacity: 0;
-}
-
-.stagger-in:nth-child(1) { animation-delay: 0ms; }
-.stagger-in:nth-child(2) { animation-delay: 100ms; }
-.stagger-in:nth-child(3) { animation-delay: 200ms; }
-.stagger-in:nth-child(4) { animation-delay: 300ms; }
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 /* Score Reveal Animation */
 .score-reveal {
   animation: scoreReveal 0.8s ease-out forwards;
@@ -303,75 +281,4 @@ body {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
-}
-
-/* Neon Glow Effect */
-.neon-glow {
-  text-shadow:
-    0 0 7px rgba(99, 102, 241, 0.5),
-    0 0 10px rgba(99, 102, 241, 0.3);
-}
-
-/* Border Animation */
-.animated-border {
-  position: relative;
-}
-
-.animated-border::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: inherit;
-  background: linear-gradient(
-    90deg,
-    var(--color-electric),
-    #a855f7,
-    #ec4899,
-    var(--color-electric)
-  );
-  background-size: 300% 100%;
-  animation: borderGradient 4s linear infinite;
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.animated-border:hover::before {
-  opacity: 1;
-}
-
-@keyframes borderGradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* Pulse Ring */
-@keyframes pulse-ring {
-  0% {
-    transform: scale(0.95);
-    opacity: 0.8;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 0.4;
-  }
-  100% {
-    transform: scale(0.95);
-    opacity: 0.8;
-  }
-}
-
-.pulse-ring {
-  animation: pulse-ring 2s ease-in-out infinite;
-}
-
-/* Floating Animation */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
-
-.float {
-  animation: float 3s ease-in-out infinite;
 }
