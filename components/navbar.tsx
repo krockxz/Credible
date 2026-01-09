@@ -5,16 +5,18 @@ import { Button } from "@/components/ui/button";
 
 export function Navbar() {
   return (
-    <nav className="border-b border-border/40 bg-background/50 backdrop-blur-xl sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
-            <span className="text-primary-foreground text-sm font-bold">C</span>
+    <nav className="fixed top-4 left-0 right-0 z-50">
+      <div className="max-w-2xl mx-auto px-4">
+        <div className="rounded-full border border-transparent dark:bg-black/50 dark:border-white/[0.2] bg-white/50 backdrop-blur-md shadow-input flex items-center justify-between px-6 py-4">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
+              <span className="text-primary-foreground text-sm font-bold">C</span>
+            </div>
+            <span className="text-lg font-semibold tracking-tight">Credible</span>
           </div>
-          <span className="text-lg font-semibold tracking-tight">Credible</span>
-        </div>
 
-        <div className="flex items-center gap-2">
+          {/* GitHub Button */}
           <Button
             variant="ghost"
             size="icon"

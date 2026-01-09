@@ -66,7 +66,7 @@ export default function HomePage() {
 
       <Navbar />
 
-      <main className="max-w-2xl mx-auto px-4 py-16">
+      <main className="max-w-2xl mx-auto px-4 pt-28 pb-16">
         {!result ? (
           <UploadForm
             jobDesc={jobDesc}
